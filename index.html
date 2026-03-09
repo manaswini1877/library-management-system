@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced SQL Query Studio</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Google Fonts for premium IDE typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <!-- Main Application Wrapper -->
+    <div class="app-container">
+        
+        <!-- Left Sidebar: Schema Explorer -->
+        <aside class="sidebar glass-panel">
+            <div class="sidebar-header">
+                <h2>&#x1F4DC; Schema Explorer</h2>
+                <div class="connection-status">
+                    <span class="status-dot"></span> Connected
+                </div>
+            </div>
+            
+            <div class="schema-content" id="schema-container">
+                <div class="loader">Loading schema...</div>
+                <!-- Schema structure will be injected here dynamically by script.js -->
+            </div>
+        </aside>
+
+        <!-- Right Main Area: Query Editor & Results -->
+        <main class="main-content">
+            
+            <header class="top-nav glass-panel">
+                <h1>Library ERP Database Studio</h1>
+                <div class="branding">Powered by Node.js & MySQL</div>
+            </header>
+
+            <!-- Query Editor Section -->
+            <section class="editor-section glass-panel">
+                <div class="editor-header">
+                    <h3>&#x1F4BB; SQL Query Editor</h3>
+                    <div class="editor-actions">
+                        <button id="btn-run" class="btn btn-primary">▶ Run Query (Ctrl+Enter)</button>
+                        <button id="btn-export" class="btn btn-secondary">⬇ Export CSV</button>
+                    </div>
+                </div>
+                
+                <div class="editor-wrapper">
+                    <textarea id="sql-query" placeholder="Type your raw MySQL queries here...&#10;Example: SELECT * FROM Books;"></textarea>
+                </div>
+            </section>
+
+            <!-- Results Section -->
+            <section class="results-section glass-panel">
+                <div class="results-header">
+                    <h3>&#x1F4CA; Execution Results</h3>
+                    <span id="results-meta" class="results-meta"></span>
+                </div>
+                
+                <div class="results-container" id="results-container">
+                    <!-- Default state / error messages / tables will be injected here -->
+                    <div class="empty-state">No queries executed yet. Output will appear here.</div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

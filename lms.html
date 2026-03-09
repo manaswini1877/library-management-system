@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library Management System</title>
+    <!-- Dynamic SVG Favicon (Library Books) -->
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
+    <link rel="stylesheet" href="lms.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+    <div class="app-layout">
+
+        <!-- Sidebar Navigation -->
+        <nav class="sidebar">
+            <div class="logo">
+                <span class="logo-icon">&#x1F4DA;</span>
+                <span class="logo-text">LibSys</span>
+            </div>
+            <ul class="nav-links">
+                <li class="nav-item active admin-only" data-target="view-dashboard" id="nav-dashboard">
+                    <span class="nav-icon">&#x1F3E0;</span> Dashboard
+                </li>
+                <li class="nav-item" data-target="view-books" id="nav-books">
+                    <span class="nav-icon">&#x1F4D6;</span> Book Catalog
+                </li>
+                <li class="nav-item admin-only" data-target="view-members" id="nav-members">
+                    <span class="nav-icon">&#x1F464;</span> Members
+                </li>
+                <li class="nav-item" data-target="view-borrowings" id="nav-borrowings">
+                    <span class="nav-icon">&#x1F4CB;</span> <span id="borrowings-title">Borrowings</span>
+                </li>
+                <li class="nav-item admin-only" data-target="view-requests" id="nav-requests">
+                    <span class="nav-icon">&#x23F3;</span> Requests <span id="request-badge"
+                        style="background:var(--warning); color:#000; font-size:0.7rem; padding: 2px 6px; border-radius:10px; margin-left:5px; font-weight:700; display:none;">0</span>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Main Content Area -->
+        <main class="main-container">
+
+            <header class="topbar">
+                <h1 id="page-title">Dashboard</h1>
+                <div class="user-profile">
+                    <span class="user-avatar" id="user-avatar">&#x1F9D1;&#x200D;&#x1F3EB;</span>
+                    <span id="user-name-display">Admin User</span>
+                    <button class="btn btn-secondary"
+                        style="padding: 0.3rem 0.6rem; font-size: 0.8rem; margin-left: 10px;"
+                        onclick="logout()">Logout</button>
+                </div>
+            </header>
+
+            <div class="content-wrapper">
+
+                <!-- Dashboard View -->
+                <section id="view-dashboard" class="view-section active">
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <h3>Total Books</h3>
+                            <p class="stat-value" id="stat-books">-</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Active Members</h3>
+                            <p class="stat-value" id="stat-members">-</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Books Borrowed</h3>
+                            <p class="stat-value" id="stat-borrowed">-</p>
+                        </div>
+                    </div>
+
+                    <div class="quick-actions">
+                        <h2>Quick Actions</h2>
+                        <div class="action-buttons">
+                            <button class="btn btn-primary" onclick="openModal('modal-add-book')">+ Add New
+                                Book</button>
+                            <button class="btn btn-secondary" onclick="openModal('modal-issue-book')">&#x1F4E4; Issue
+                                Book</button>
+                            <button class="btn btn-secondary" onclick="openModal('modal-return-book')">&#x1F4E5; Return
+                                Book</button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Books View -->
+                <section id="view-books" class="view-section">
+                    <div class="section-header">
+                        <h2>Library Catalog</h2>
+                        <button class="btn btn-primary admin-only" onclick="openModal('modal-add-book')">+ Add
+                            Book</button>
+                    </div>
+                    <div class="table-container">
+                        <table class="data-table" id="table-books">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Title</th>
+                                    <th>Author</th>
+                                    <th>Category</th>
+                                    <th>Stock (Available/Total)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Rows generated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Members View -->
+                <section id="view-members" class="view-section">
+                    <div class="section-header">
+                        <h2>Registered Members</h2>
+                    </div>
+                    <div class="table-container">
+                        <table class="data-table" id="table-members">
+                            <thead>
+                                <tr>
+                                    <th>Member ID</th>
+                                    <th>Univ. ID</th>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Type</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Rows generated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Borrowings View -->
+                <section id="view-borrowings" class="view-section">
+                    <div class="section-header">
+                        <h2 id="view-borrowings-header">Active Borrowings</h2>
+                        <div class="admin-only">
+                            <button class="btn btn-secondary" onclick="openModal('modal-issue-book')">Issue</button>
+                            <button class="btn btn-secondary" onclick="openModal('modal-return-book')">Return</button>
+                        </div>
+                    </div>
+                    <div class="table-container">
+                        <table class="data-table" id="table-borrowings">
+                            <thead>
+                                <tr>
+                                    <th>Record ID</th>
+                                    <th id="borrow-member-col">Member</th>
+                                    <th>Book Title</th>
+                                    <th>Borrow Date</th>
+                                    <th>Due Date</th>
+                                    <th>Days Left</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Rows generated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Requests View (Admin Only) -->
+                <section id="view-requests" class="view-section admin-only">
+                    <div class="section-header">
+                        <h2>Pending Book Requests</h2>
+                    </div>
+                    <div class="table-container">
+                        <table class="data-table" id="table-requests">
+                            <thead>
+                                <tr>
+                                    <th>Req ID</th>
+                                    <th>Student</th>
+                                    <th>Book Title</th>
+                                    <th>Date Requested</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Rows generated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Modals -->
+
+    <!-- Add Book Modal -->
+    <div id="modal-add-book" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal('modal-add-book')">&times;</span>
+            <h2>Add New Book</h2>
+            <form id="form-add-book">
+                <div class="form-group">
+                    <label>Title</label>
+                    <input type="text" id="add-title" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>ISBN</label>
+                        <input type="text" id="add-isbn" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Year</label>
+                        <input type="number" id="add-year" required>
+                    </div>
+                </div>
+                <!-- Hardcoded selects for demo purposes relating to our DB -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Category ID (1-4)</label>
+                        <input type="number" id="add-category" min="1" max="4" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Author ID (1-5)</label>
+                        <input type="number" id="add-author" min="1" max="5" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Total Copies</label>
+                    <input type="number" id="add-copies" min="1" value="1" required>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Save Book</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Issue Book Modal -->
+    <div id="modal-issue-book" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal('modal-issue-book')">&times;</span>
+            <h2>Issue Book</h2>
+            <form id="form-issue-book">
+                <div class="form-group">
+                    <label>Book ID</label>
+                    <input type="number" id="issue-book-id" required>
+                </div>
+                <div class="form-group">
+                    <label>Member ID</label>
+                    <input type="number" id="issue-member-id" required>
+                </div>
+                <div class="form-group">
+                    <label>Due Date (YYYY-MM-DD)</label>
+                    <input type="date" id="issue-due-date" required>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Issue Book</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Return Book Modal -->
+    <div id="modal-return-book" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal('modal-return-book')">&times;</span>
+            <h2>Return Book</h2>
+            <form id="form-return-book">
+                <div class="form-group">
+                    <label>Borrow Record ID</label>
+                    <input type="number" id="return-record-id" required
+                        placeholder="Enter the Record ID from Borrowings view">
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Mark as Returned</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Global Toast Notification -->
+    <div id="toast" class="toast">Message goes here</div>
+
+    <script src="lms.js"></script>
+</body>
+
+</html>
