@@ -1,7 +1,7 @@
 {
   "name": "library-management-system",
   "version": "1.0.0",
-  "description": "",
+  "description": "A comprehensive Library Management System (LMS) designed for universities to manage books, members (students and faculty), and borrowing records efficiently. The system includes an intuitive interface for both users and administrators, powered by a robust backend and a relational database.",
   "main": "script.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -15,5 +15,14 @@
     "cors": "^2.8.6",
     "express": "^5.2.1",
     "mysql2": "^3.18.2"
-  }
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/manaswini1877/library-management-system.git"
+  },
+  "bugs": {
+    "url": "https://github.com/manaswini1877/library-management-system/issues"
+  },
+  "homepage": "https://github.com/manaswini1877/library-management-system#readme"
 }
