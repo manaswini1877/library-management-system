@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>CSS Selectors</title>
+<style>
+p{
+color:blue;
+}
+#id1{
+color:red;
+}
+.class1{
+color:green;
+}
+h1,h2{
+text-align:center;
+}
+*{
+font-family:Arial;
+}
+div p{
+color:purple;
+}
+div > h3{
+color:brown;
+}
+h4 + p{
+color:orange;
+}
+h4 ~ span{
+color:pink;
+}
+a:hover{
+color:red;
+}
+p::first-letter{
+font-size:30px;
+color:darkblue;
+}
+input[type="text"]{
+background-color:lightgray;
+}
+</style>
+</head>
+<body>
+<h1>Group Selector</h1>
+<h2>Group Selector</h2>
+<p>Element Selector Example</p>
+<p id="id1">ID Selector Example</p>
+<p class="class1">Class Selector Example</p>
+<div>
+<p>Descendant Selector</p>
+<h3>Child Selector</h3>
+</div>
+<h4>Adjacent Sibling Example</h4>
+<p>This paragraph uses adjacent sibling selector</p>
+<span>General sibling 1</span>
+<span>General sibling 2</span>
+<br><br>
+<a href="#">Hover over this link</a>
+<p>Pseudo Element Example</p>
+<br>
+<input type="text" placeholder="Attribute selector">
+</body>
+</html>

@@ -47,7 +47,13 @@
 
             <header class="topbar">
                 <h1 id="page-title">Dashboard</h1>
-                <div class="user-profile">
+                <div class="user-profile" style="display: flex; align-items: center;">
+                    <!-- Notification Bell -->
+                    <div id="notification-bell" style="position: relative; cursor: pointer; display: none; margin-right: 15px;" onclick="openModal('modal-reminders')">
+                        <span style="font-size: 1.5rem;">&#x1F514;</span>
+                        <span id="reminder-badge" style="position: absolute; top: -5px; right: -5px; background: var(--danger); color: white; border-radius: 50%; padding: 2px 6px; font-size: 0.7rem; font-weight: bold; display: none;">0</span>
+                    </div>
+                    
                     <span class="user-avatar" id="user-avatar">&#x1F9D1;&#x200D;&#x1F3EB;</span>
                     <span id="user-name-display">Admin User</span>
                     <button class="btn btn-secondary"
@@ -90,12 +96,20 @@
 
                 <!-- Books View -->
                 <section id="view-books" class="view-section">
-                    <div class="section-header">
-                        <h2>Library Catalog</h2>
-                        <button class="btn btn-primary admin-only" onclick="openModal('modal-add-book')">+ Add
-                            Book</button>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                    <h2>Book Catalog</h2>
+                    <button class="btn btn-primary admin-only" onclick="openModal('modal-add-book')">+ Add New Book</button>
+                </div>
+                
+                <!-- Smart Recommendations Section (Student Only) -->
+                <div id="recommendations-section" style="display: none; margin-bottom: 2rem;">
+                    <h3 style="margin-bottom: 1rem; color: var(--primary);">✨ Recommended for You</h3>
+                    <div id="recommendations-container" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1rem;">
+                        <!-- Recommendation cards injected via JS -->
                     </div>
-                    <div class="table-container">
+                </div>
+
+                <div class="table-container">
                         <table class="data-table" id="table-books">
                             <thead>
                                 <tr>
@@ -269,6 +283,20 @@
                 </div>
                 <button type="submit" class="btn btn-primary w-100">Mark as Returned</button>
             </form>
+        </div>
+    </div>
+
+    <!-- Due Date Reminders Modal -->
+    <div id="modal-reminders" class="modal">
+        <div class="modal-content" style="border-top: 4px solid var(--danger);">
+            <span class="close-btn" onclick="closeModal('modal-reminders')">&times;</span>
+            <h2 style="color: var(--danger); display: flex; align-items: center; gap: 10px;">
+                <span style="font-size: 1.5rem;">&#x26A0;&#xFE0F;</span> Action Required
+            </h2>
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1rem;">You have books that are overdue or due very soon!</p>
+            <div id="reminders-list" style="margin-top: 1rem; display: flex; flex-direction: column; gap: 10px;">
+                <!-- Reminders injected via JS -->
+            </div>
         </div>
     </div>
 

@@ -106,7 +106,56 @@
                 </button>
             </form>
 
-            <div style="margin-top: 2rem; font-size: 0.85rem; color: var(--text-muted);">
+            <form id="register-form" style="display: none;">
+                <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+                    <div class="form-group" style="text-align: left; flex: 1;">
+                        <label>First Name</label>
+                        <input type="text" id="reg-fname" required placeholder="John">
+                    </div>
+                    <div class="form-group" style="text-align: left; flex: 1;">
+                        <label>Last Name</label>
+                        <input type="text" id="reg-lname" required placeholder="Doe">
+                    </div>
+                </div>
+                <div class="form-group" style="text-align: left;">
+                    <label>University ID</label>
+                    <input type="text" id="reg-id" required placeholder="S2026001">
+                </div>
+                <div class="form-group" style="text-align: left;">
+                    <label>Email Address</label>
+                    <input type="email" id="reg-email" required placeholder="john.doe@university.edu"
+                        autocomplete="email">
+                </div>
+                <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+                    <div class="form-group" style="text-align: left; flex: 1;">
+                        <label>Department</label>
+                        <select id="reg-department" required style="width: 100%; padding: 0.8rem; border: 1px solid var(--border-light); border-radius: 6px; background: rgba(255, 255, 255, 0.05); color: white; font-family: inherit;">
+                            <option value="" disabled selected>Select Department</option>
+                            <option value="Computer Science">Computer Science</option>
+                            <option value="Mathematics">Mathematics</option>
+                            <option value="Physics">Physics</option>
+                            <option value="Literature">Literature</option>
+                            <option value="General">General / Other</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group" style="text-align: left;">
+                    <label>Password</label>
+                    <input type="password" id="reg-password" required placeholder="••••••••"
+                        autocomplete="new-password">
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100"
+                    style="margin-top: 1rem; padding: 0.8rem; font-size: 1rem;">
+                    Register Now
+                </button>
+            </form>
+
+            <div style="margin-top: 1.5rem; font-size: 0.9rem;">
+                <a href="#" id="toggle-form-link" onclick="toggleForm()" style="color: var(--primary); text-decoration: none; font-weight: 500;">Create an account</a>
+            </div>
+
+            <div style="margin-top: 1.5rem; font-size: 0.85rem; color: var(--text-muted);" id="demo-hints">
                 <span id="hint-text">Demo Student: chaitanya@university.edu | pass: student123</span>
             </div>
         </div>

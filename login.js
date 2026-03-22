@@ -12,6 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     document.getElementById('login-form').addEventListener('submit', handleLogin);
+    document.getElementById('register-form').addEventListener('submit', handleRegister);
 });
 
 // Toast Notification
@@ -41,12 +42,48 @@ function selectRole(role) {
         hint.textContent = 'Demo Admin: admin | pass: admin123';
         input.value = 'admin'; // auto-fill for demo convenience
         document.getElementById('login-password').value = 'admin123';
+        
+        // Hide registration link for Admins
+        document.getElementById('toggle-form-link').style.display = 'none';
+        if (isShowingRegister) toggleForm(); // Force back to login view if admin
     } else {
         label.textContent = 'Email Address';
         input.placeholder = 'name@university.edu';
         hint.textContent = 'Demo Student: chaitanya@university.edu | pass: student123';
         input.value = 'chaitanya@university.edu';
         document.getElementById('login-password').value = 'student123';
+        
+        // Show registration link for Students
+        document.getElementById('toggle-form-link').style.display = 'inline';
+    }
+}
+
+let isShowingRegister = false;
+
+// Toggle Login / Register UI
+function toggleForm() {
+    isShowingRegister = !isShowingRegister;
+    const loginForm = document.getElementById('login-form');
+    const regForm = document.getElementById('register-form');
+    const toggleLink = document.getElementById('toggle-form-link');
+    const roleSelector = document.querySelector('.role-selector');
+    const demoHints = document.getElementById('demo-hints');
+    const headerTitle = document.querySelector('.login-header h2');
+
+    if (isShowingRegister) {
+        loginForm.style.display = 'none';
+        regForm.style.display = 'block';
+        roleSelector.style.display = 'none';
+        demoHints.style.display = 'none';
+        toggleLink.textContent = 'Already have an account? Sign In';
+        headerTitle.textContent = 'Create an Account';
+    } else {
+        loginForm.style.display = 'block';
+        regForm.style.display = 'none';
+        roleSelector.style.display = 'flex';
+        demoHints.style.display = 'block';
+        toggleLink.textContent = 'Create an account';
+        headerTitle.textContent = 'Welcome Back';
     }
 }
 
@@ -90,6 +127,61 @@ async function handleLogin(e) {
     } catch (error) {
         showToast(error.message, false);
         btn.textContent = 'Sign In';
+        btn.disabled = false;
+    }
+}
+
+// Registration Form Submission
+async function handleRegister(e) {
+    e.preventDefault();
+
+    const payload = {
+        first_name: document.getElementById('reg-fname').value.trim(),
+        last_name: document.getElementById('reg-lname').value.trim(),
+        university_id: document.getElementById('reg-id').value.trim(),
+        email: document.getElementById('reg-email').value.trim(),
+        department: document.getElementById('reg-department').value,
+        password: document.getElementById('reg-password').value.trim()
+    };
+    
+    const btn = e.target.querySelector('button');
+
+    if (!payload.first_name || !payload.university_id || !payload.email || !payload.password) {
+        showToast('Please fill in all required fields', false);
+        return;
+    }
+
+    btn.textContent = 'Creating account...';
+    btn.disabled = true;
+
+    try {
+        const res = await fetch(`${API_URL}/register`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        const result = await res.json();
+
+        if (!result.success) throw new Error(result.message);
+
+        showToast('Account created successfully! Please log in.', true);
+        
+        // Auto fill email on login page
+        document.getElementById('login-username').value = payload.email;
+        document.getElementById('login-password').value = '';
+
+        // Switch back to login form
+        setTimeout(() => {
+            toggleForm();
+            e.target.reset();
+            btn.textContent = 'Register Now';
+            btn.disabled = false;
+        }, 1500);
+
+    } catch (error) {
+        showToast(error.message, false);
+        btn.textContent = 'Register Now';
         btn.disabled = false;
     }
 }

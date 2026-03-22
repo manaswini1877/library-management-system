@@ -1,66 +1,67 @@
-# Library Management System
+# 📚 Advanced Library Management System (LMS)
 
-A comprehensive Library Management System (LMS) designed for universities to manage books, members (students and faculty), and borrowing records efficiently. The system includes an intuitive interface for both users and administrators, powered by a robust backend and a relational database.
+A state-of-the-art Library Management System built with a focus on user experience, smart automation, and fair book allocation. Designed for a modern university environment using a high-performance Node.js backend and a sleek Glassmorphism UI.
 
-## Features
+## 🌟 Key Features
 
-*   **Role-Based Access Control:** Distinct interfaces and permissions for Students, Faculty, and Administrators (Librarians).
-*   **Book Management:** Categorize books, manage authors, and track stock/available copies automatically via database triggers.
-*   **Borrowing System:** Seamlessly handle book requests, borrowing, and returns, while tracking due dates and overdue statuses.
-*   **Dashboard & Views:** Active borrowings view and dashboard analytics.
-*   **RESTful API:** Node.js and Express backend handling secure communication between the frontend and the MySQL database.
+### 👤 Role-Based Access Control
+- **Two Unique Dashboards**: Seamlessly switch between **Admin (Librarian)** and **Student/Faculty** interfaces with protected routes and custom features.
+- **Smart Registration**: New users can register with department selection (CS, Physics, Math, etc.) to power personalized content from day one.
 
-## Tech Stack
+### 🔍 Interactive Book Catalog
+- **Live Search**: Instant filtering by **Title**, **Author**, or **ISBN**, allowing students to find books in milliseconds.
+- **Detailed Availability**: Shows real-time stock levels, and if out of stock, it displays **who** has the book, **when** it's due, and exactly **how many days** are left.
 
-*   **Frontend:** HTML5, CSS3, JavaScript
-*   **Backend:** Node.js, Express.js
-*   **Database:** MySQL Server (managed via `mysql2` package)
-*   **Other Tools:** CORS for cross-origin requests
+### 🧠 Smart Recommendation System
+- Finds your next great read by analyzing:
+  - **Your Borrowing History**: Personalized to your past interests.
+  - **Your Department**: Specifically suggests books related to your major.
+  - **Global Popularity**: Dynamically ranks books based on overall library borrowing trends.
 
-## Prerequisites
+### 📅 Advanced Reservation & Waitlist
+- **Fair Allocation**: Students can "Reserve (Hold)" out-of-stock books to join a waiting list.
+- **Automation**: When a copy is returned, the system automatically promotes the next person in line to "Requested" status for admin approval.
 
-*   **Node.js** (v14 or higher recommended)
-*   **MySQL Server** (Running locally or on a server)
+### 🔔 Due Date Reminders
+- **Notification Bell**: A live badge count in the student dashboard for urgent items.
+- **Auto-Popups**: Action Required modals automatically appear on login if you have books due within 3 days or already overdue.
 
-## Setup & Installation
+### ⚙️ Admin & Management Tools
+- **Full Control**: Add/Edit/Delete books and categories directly from the UI.
+- **Workflow Management**: A central "Pending Requests" queue for processing check-outs.
+- **Member Overview**: View and manage all registered library members.
+- **Self-Service**: Students can return their own books instantly from their dashboard.
 
-1.  **Clone the Repository** (If applicable):
+## 🛠️ Tech Stack
+- **Frontend**: HTML5, Vanilla CSS3 (Custom Glassmorphism Design), JavaScript (ES6+)
+- **Backend**: Node.js & Express.js
+- **Database**: MySQL Server (Managed via `mysql2/promise`)
+- **API**: RESTful architecture
+
+## 🚀 Setup & Installation
+
+1.  **Clone the Repository**:
     ```bash
     git clone <repository-url>
     cd "Library Management system"
     ```
 
-2.  **Install Dependencies:**
-    Navigate to the project directory and run:
+2.  **Install Dependencies**:
     ```bash
     npm install
     ```
 
-3.  **Database Configuration:**
-    *   Open your MySQL environment.
-    *   Run the provided `database.sql` script to create the `University_ERP_DB` database, tables, views, triggers, and insert dummy data.
-    *   Update the database connection settings (host, user, password, database) in `server.js` matching your MySQL environment.
+3.  **Database Configuration**:
+    - Import the provided `database.sql` into your MySQL Server.
+    - Update the database credentials in `server.js`.
 
-4.  **Start the Server:**
+4.  **Start the Server**:
     ```bash
-    npm start
+    node server.js
     ```
-    (This runs `node server.js`)
 
-5.  **Access the Application:**
-    Open your web browser and navigate to the application (e.g., `index.html` or `http://localhost:3000` depending on the server configuration).
+5.  **Access the Application**:
+    Open [http://localhost:3000/login.html](http://localhost:3000/login.html) in your browser.
 
-## Database Schema Highlights
-
-The application relies on the `University_ERP_DB` database with the following core tables:
-*   `Books`: Stores book details including title, ISBN, associated category, author, and available copies.
-*   `Members`: Stores student and faculty details.
-*   `Categories` & `Authors`: Relational metadata for books.
-*   `Borrow_Records`: Tracks the lifecycle of a borrow request (Requested, Borrowed, Returned, Overdue).
-*   `Admins`: Stores librarian credentials.
-
-Database triggers are included to automatically update available book copies when a book is borrowed.
-
-## License
-
-ISC License
+---
+**License**: ISC License

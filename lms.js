@@ -58,6 +58,10 @@ document.addEventListener('DOMContentLoaded', () => {
         loadDashboardStats();
     }
     loadBooks();
+    if (currentUser.role === 'student') {
+        loadRecommendations();
+        loadReminders();
+    }
 
     // 4. Navigation logic
     const navItems = document.querySelectorAll('.nav-item');
@@ -188,12 +192,29 @@ async function loadBooks() {
                     <td>${stockHtml}</td>
             `;
 
-            // Add Request Button for students
+            // Add Request/Reserve Button for students
             if (currentUser.role === 'student') {
                 if (book.available_copies > 0) {
                     rowHtml += `<td style="text-align:right;"><button class="btn btn-secondary" style="padding: 0.4rem 0.8rem;" onclick="requestBook(${book.book_id})">Request</button></td>`;
                 } else {
-                    rowHtml += `<td style="text-align:right;"><span style="color:var(--danger); font-size:0.85rem;">Out of Stock</span></td>`;
+                    let outOfStockText = '';
+                    if (book.expected_available_date) {
+                        const expectedDate = new Date(book.expected_available_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'long' });
+                        const daysText = book.days_left < 0 ? 'Overdue!' : `in ${book.days_left} days`;
+                        outOfStockText = `
+                            <div style="font-size: 0.8rem; color: var(--text-muted); text-align: right; margin-bottom: 5px; line-height: 1.4;">
+                                <span style="display:block; color:var(--warning); font-weight:600;">Available ${daysText}</span>
+                                <span style="display:block;">Issued to: ${book.issued_to_id || 'Unknown'}</span>
+                                <span style="display:block;">Due date: ${expectedDate}</span>
+                            </div>
+                        `;
+                    } else {
+                        outOfStockText = `<small style="color:var(--danger);">Out of Stock</small><br>`;
+                    }
+                    rowHtml += `<td style="text-align:right;">
+                                    ${outOfStockText}
+                                    <button class="btn btn-secondary" style="padding: 0.4rem 0.8rem; margin-top: 4px; border-color:var(--warning); color:var(--warning);" onclick="requestBook(${book.book_id})">Reserve (Hold)</button>
+                                </td>`;
                 }
             }
 
@@ -202,6 +223,120 @@ async function loadBooks() {
         });
     } catch (error) {
         showToast("Error loading books: " + error.message, false);
+    }
+}
+
+// Live filter for books catalog
+function filterBooks() {
+    const query = document.getElementById('book-search').value.toLowerCase();
+    const rows = document.querySelectorAll('#table-books tbody tr');
+
+    rows.forEach(row => {
+        const text = row.innerText.toLowerCase();
+        row.style.display = text.includes(query) ? '' : 'none';
+    });
+}
+
+// Fetch and render Smart Recommendations (Student Only)
+async function loadRecommendations() {
+    if (currentUser.role !== 'student') return;
+    
+    try {
+        const res = await fetch(`${API_URL}/recommendations/${currentUser.id}`);
+        const result = await res.json();
+
+        if (!result.success) throw new Error(result.message);
+
+        const recSection = document.getElementById('recommendations-section');
+        const recContainer = document.getElementById('recommendations-container');
+        
+        if (result.data.length === 0) {
+            recSection.style.display = 'none';
+            return;
+        }
+
+        recSection.style.display = 'block';
+        recContainer.innerHTML = '';
+
+        result.data.forEach(book => {
+            const author = (book.author_first && book.author_last) ? `${book.author_first} ${book.author_last}` : 'Unknown Author';
+            const stockColor = book.available_copies > 0 ? 'var(--success)' : 'var(--danger)';
+            
+            let btnHtml = '';
+            if (book.available_copies > 0) {
+                btnHtml = `<button class="btn btn-primary" style="width:100%; padding:0.5rem;" onclick="requestBook(${book.book_id})">Request Book</button>`;
+            } else {
+                btnHtml = `<button class="btn btn-secondary" style="width:100%; padding:0.5rem;" disabled>Out of Stock</button>`;
+            }
+
+            const card = document.createElement('div');
+            card.style.cssText = 'background: rgba(255,255,255,0.05); padding: 1.5rem; border-radius: 12px; border: 1px solid var(--border-light);';
+            card.innerHTML = `
+                <div style="font-size: 0.8rem; color: var(--primary); font-weight: 600; margin-bottom: 0.5rem;">${book.category_name || 'General'}</div>
+                <h4 style="margin-bottom: 0.5rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${book.title}">${book.title}</h4>
+                <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1rem;">${author}</p>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; font-size: 0.85rem;">
+                    <span><span style="color:${stockColor}; font-weight:bold;">${book.available_copies}</span>/${book.total_copies} Left</span>
+                    <span>⭐ ${book.popularity || 0} borrows</span>
+                </div>
+                ${btnHtml}
+            `;
+            recContainer.appendChild(card);
+        });
+
+    } catch (error) {
+        console.error("Error loading recommendations:", error);
+    }
+}
+
+// Fetch and render Due Date Reminders (Student Only)
+async function loadReminders() {
+    if (currentUser.role !== 'student') return;
+
+    try {
+        const res = await fetch(`${API_URL}/reminders/${currentUser.id}`);
+        const result = await res.json();
+
+        if (!result.success) throw new Error(result.message);
+
+        const bell = document.getElementById('notification-bell');
+        const badge = document.getElementById('reminder-badge');
+        const list = document.getElementById('reminders-list');
+
+        if (result.data.length > 0) {
+            bell.style.display = 'block';
+            badge.style.display = 'block';
+            badge.innerText = result.data.length;
+
+            list.innerHTML = '';
+            result.data.forEach(rem => {
+                const urgencyColor = rem.days_left < 0 ? 'var(--danger)' : 'var(--warning)';
+                const urgencyText = rem.days_left < 0 ? `${Math.abs(rem.days_left)} Days Overdue!` : `Due in ${rem.days_left} Days`;
+                
+                list.innerHTML += `
+                    <div style="background: rgba(255,255,255,0.05); border-left: 4px solid ${urgencyColor}; padding: 1rem; border-radius: 4px;">
+                        <div style="font-weight: 600; font-size: 1.1rem; margin-bottom: 5px;">${rem.title}</div>
+                        <div style="font-size: 0.9rem; color: var(--text-muted);">
+                            Due Date: <span style="color: white;">${new Date(rem.due_date).toLocaleDateString()}</span>
+                        </div>
+                        <div style="color: ${urgencyColor}; font-weight: bold; margin-top: 5px; font-size: 0.9rem;">
+                            ⚠️ ${urgencyText}
+                        </div>
+                    </div>
+                `;
+            });
+
+            // Auto-open modal on first load if they have reminders
+            if (!sessionStorage.getItem('reminders_shown')) {
+                openModal('modal-reminders');
+                sessionStorage.setItem('reminders_shown', 'true');
+            }
+        } else {
+            bell.style.display = 'none';
+        }
+
+    } catch (error) {
+        console.error("Error loading reminders:", error);
     }
 }
 
@@ -247,6 +382,13 @@ async function loadBorrowings() {
         if (!result.success) throw new Error(result.message);
 
         const tbody = document.querySelector('#table-borrowings tbody');
+        const theadTr = document.querySelector('#table-borrowings thead tr');
+
+        // Add Action column header dynamically if student
+        if (currentUser.role === 'student' && !document.getElementById('th-borrow-action')) {
+            theadTr.innerHTML += `<th id="th-borrow-action" style="text-align:right;">Action</th>`;
+        }
+
         tbody.innerHTML = '';
 
         if (result.data.length === 0) {
@@ -269,7 +411,17 @@ async function loadBorrowings() {
                 <td>${new Date(rec.borrow_date).toLocaleDateString()}</td>
                 <td>${new Date(rec.due_date).toLocaleDateString()}</td>
                 <td style="color: ${dueColor}; font-weight: 600;">${rec.days_left < 0 ? Math.abs(rec.days_left) + ' days overdue' : rec.days_left + ' days left'}</td>
-            </tr>`;
+            `;
+
+            if (currentUser.role === 'student') {
+                if (rec.status === 'Borrowed') {
+                    rowHtml += `<td style="text-align:right;"><button class="btn btn-secondary" style="padding: 0.3rem 0.6rem; font-size:0.8rem; border-color:var(--success); color:var(--success)" onclick="returnBook(${rec.record_id})">Return Book</button></td>`;
+                } else {
+                    rowHtml += `<td style="text-align:right;"><span style="font-size:0.8rem; color:var(--text-muted)">${rec.status}</span></td>`;
+                }
+            }
+
+            rowHtml += `</tr>`;
 
             tbody.innerHTML += rowHtml;
         });
@@ -478,6 +630,28 @@ async function handleReturnBook(e) {
         if (document.getElementById('view-books').classList.contains('active')) loadBooks();
         if (document.getElementById('view-borrowings').classList.contains('active')) loadBorrowings();
 
+    } catch (error) {
+        showToast(error.message, false);
+    }
+}
+
+// Student-specific return function
+async function returnBook(record_id) {
+    if (!confirm("Are you sure you want to return this book?")) return;
+
+    try {
+        const res = await fetch(`${API_URL}/return`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ record_id })
+        });
+        const result = await res.json();
+        if (!result.success) throw new Error(result.message);
+
+        showToast(result.message, true);
+        loadBorrowings(); // Refresh the list
+        loadBooks(); // Refresh stock in catalog
+        loadDashboardStats();
     } catch (error) {
         showToast(error.message, false);
     }
