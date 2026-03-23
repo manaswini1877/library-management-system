@@ -3,6 +3,13 @@ const cors = require('cors');
 const mysql = require('mysql2/promise');
 
 const app = express();
+
+// Log every request to help debug Render deployment
+app.use((req, res, next) => {
+    console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
+    next();
+});
+
 const port = process.env.PORT || 3000;
 
 app.use(cors());
