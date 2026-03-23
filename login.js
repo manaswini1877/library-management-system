@@ -2,7 +2,18 @@
  * login.js - Authentication Logic
  */
 
-const API_URL = 'http://localhost:3000/api';
+// Service Worker Registration
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+            .then(reg => console.log('Service Worker: Registered'))
+            .catch(err => console.log(`Service Worker: Error: ${err}`));
+    });
+}
+
+const API_URL = (window.location.hostname === 'localhost' || window.location.hostname.includes('10.242.'))
+    ? `http://${window.location.hostname}:3000/api`
+    : '/api'; // Use relative path for production (Render)
 let currentRole = 'student'; // default
 
 document.addEventListener('DOMContentLoaded', () => {

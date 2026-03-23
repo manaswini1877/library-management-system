@@ -8,6 +8,7 @@
     <!-- Dynamic SVG Favicon (Library Books) -->
     <link rel="icon"
         href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
+    <link rel="manifest" href="manifest.json">
     <!-- Reusing our premium glassmorphism CSS -->
     <link rel="stylesheet" href="lms.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -43,6 +44,21 @@
             margin-bottom: 1rem;
             color: var(--primary);
             text-shadow: 0 0 15px rgba(0, 229, 255, 0.4);
+        }
+
+        @media (max-width: 480px) {
+            .login-box {
+                padding: 1.5rem;
+                border-radius: 0;
+                height: 100%;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                border: none;
+            }
+            .app-container {
+                padding: 0;
+            }
         }
 
         .role-selector {

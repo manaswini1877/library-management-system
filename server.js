@@ -3,7 +3,7 @@ const cors = require('cors');
 const mysql = require('mysql2/promise');
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
@@ -11,10 +11,11 @@ app.use(express.static(__dirname)); // Serve frontend files (HTML/CSS/JS) automa
 
 // Database configuration
 const dbConfig = {
-    host: 'localhost',
-    user: 'root',
-    password: '', // Ensure this matches your Workbench password!
-    database: 'University_ERP_DB',
+    host: process.env.DB_HOST || 'localhost',
+    user: process.env.DB_USER || 'root',
+    password: process.env.DB_PASSWORD || '', 
+    database: process.env.DB_NAME || 'University_ERP_DB',
+    port: process.env.DB_PORT || 3306,
     multipleStatements: true
 };
 

@@ -5,18 +5,22 @@
   "main": "script.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+    "start": "node server.js",
+    "build-mobile": "xcopy /Y *.html www\\ && xcopy /Y *.css www\\ && xcopy /Y *.js www\\ && xcopy /Y *.png www\\ && xcopy /Y manifest.json www\\",
+    "sync-mobile": "npm run build-mobile && npx cap sync"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "@capacitor/android": "^8.2.0",
+    "@capacitor/cli": "^8.2.0",
+    "@capacitor/core": "^8.2.0",
     "cors": "^2.8.6",
     "express": "^5.2.1",
     "mysql2": "^3.18.2"
   },
-  "devDependencies": {},
   "repository": {
     "type": "git",
     "url": "git+https://github.com/manaswini1877/library-management-system.git"

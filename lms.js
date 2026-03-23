@@ -2,7 +2,18 @@
  * lms.js - Library Management System Logic
  */
 
-const API_URL = 'http://localhost:3000/api';
+// Service Worker Registration
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+            .then(reg => console.log('Service Worker: Registered'))
+            .catch(err => console.log(`Service Worker: Error: ${err}`));
+    });
+}
+
+const API_URL = (window.location.hostname === 'localhost' || window.location.hostname.includes('10.242.'))
+    ? `http://${window.location.hostname}:3000/api`
+    : '/api'; // Use relative path for production (Render)
 
 // Authentication & Role Checking
 const userSession = localStorage.getItem('lms_user');
@@ -63,35 +74,95 @@ document.addEventListener('DOMContentLoaded', () => {
         loadReminders();
     }
 
+    // 3b. Setup Mobile-Specific Navigation
+    setupMobileNav();
+
     // 4. Navigation logic
     const navItems = document.querySelectorAll('.nav-item');
-    const viewSections = document.querySelectorAll('.view-section');
-    const pageTitle = document.getElementById('page-title');
-
+    
     navItems.forEach(item => {
         item.addEventListener('click', () => {
-            // Check if clicking a hidden item somehow
             if (item.style.display === 'none') return;
-
-            // Update Active State
-            navItems.forEach(n => n.classList.remove('active'));
-            item.classList.add('active');
-
-            // Switch View
             const targetId = item.getAttribute('data-target');
-            viewSections.forEach(v => v.classList.remove('active'));
-            document.getElementById(targetId).classList.add('active');
-
-            // Update Title & Fetch Data
-            pageTitle.innerText = item.innerText.trim().replace(/[0-9]/g, ''); // Removes badge number from title
-
-            if (targetId === 'view-books') loadBooks();
-            if (targetId === 'view-members' && currentUser.role === 'admin') loadMembers();
-            if (targetId === 'view-borrowings') loadBorrowings();
-            if (targetId === 'view-requests' && currentUser.role === 'admin') loadRequests();
-            if (targetId === 'view-dashboard' && currentUser.role === 'admin') loadDashboardStats();
+            switchView(targetId, item);
         });
     });
+
+    // Global View Switcher
+    window.switchView = function(targetId, navElement = null) {
+        const viewSections = document.querySelectorAll('.view-section');
+        const pageTitle = document.getElementById('page-title');
+        const allNavs = document.querySelectorAll('.nav-item, .mobile-nav-item');
+
+        // Update Active States across ALL navigation elements (Desktop + Mobile)
+        allNavs.forEach(n => {
+            if (n.getAttribute('data-target') === targetId) {
+                n.classList.add('active');
+            } else {
+                n.classList.remove('active');
+            }
+        });
+
+        // Switch View Section
+        viewSections.forEach(v => v.classList.remove('active'));
+        const targetView = document.getElementById(targetId);
+        if (targetView) targetView.classList.add('active');
+
+        // Update Title & Fetch Data
+        if (navElement) {
+            pageTitle.innerText = navElement.innerText.trim().replace(/[0-9]/g, '');
+        } else {
+            // Fallback for direct calls
+            const labelMap = {
+                'view-dashboard': 'Dashboard',
+                'view-books': 'Book Catalog',
+                'view-borrowings': 'Active Borrowings',
+                'view-requests': 'Pending Requests',
+                'view-members': 'Members'
+            };
+            pageTitle.innerText = labelMap[targetId] || 'Library System';
+        }
+
+        if (targetId === 'view-books') loadBooks();
+        if (targetId === 'view-members' && currentUser.role === 'admin') loadMembers();
+        if (targetId === 'view-borrowings') loadBorrowings();
+        if (targetId === 'view-requests' && currentUser.role === 'admin') loadRequests();
+        if (targetId === 'view-dashboard' && currentUser.role === 'admin') loadDashboardStats();
+        
+        // Scroll to top on mobile view switch
+        if (window.innerWidth <= 768) {
+            document.querySelector('.content-wrapper').scrollTo(0, 0);
+        }
+    }
+
+    // Initialize Mobile Nav Items
+    function setupMobileNav() {
+        const mobileNav = document.getElementById('mobile-nav');
+        if (!mobileNav) return;
+
+        const studentItems = [
+            { id: 'view-books', label: 'Catalog', icon: '🔍' },
+            { id: 'view-borrowings', label: 'My Books', icon: '📚' },
+            { id: 'view-dashboard', label: 'Profile', icon: '👤' }
+        ];
+
+        const adminItems = [
+            { id: 'view-dashboard', label: 'Stats', icon: '📈' },
+            { id: 'view-books', label: 'Books', icon: '📖' },
+            { id: 'view-requests', label: 'Requests', icon: '📩' },
+            { id: 'view-borrowings', label: 'Issuance', icon: '📄' }
+        ];
+
+        const activeItems = currentUser.role === 'admin' ? adminItems : studentItems;
+
+        mobileNav.innerHTML = activeItems.map(item => `
+            <div class="mobile-nav-item ${document.getElementById(item.id).classList.contains('active') ? 'active' : ''}" 
+                 data-target="${item.id}" onclick="switchView('${item.id}', this)">
+                <span class="icon">${item.icon}</span>
+                <span>${item.label}</span>
+            </div>
+        `).join('');
+    }
 
     // Form Event Listeners (Only bind if admin or forms exist)
     const formAdd = document.getElementById('form-add-book');
@@ -185,11 +256,11 @@ async function loadBooks() {
 
             let rowHtml = `
                 <tr>
-                    <td>#${book.book_id}</td>
-                    <td style="font-weight: 500;">${book.title}<br><small style="color:var(--text-muted)">ISBN: ${book.isbn}</small></td>
-                    <td>${author}</td>
-                    <td>${category}</td>
-                    <td>${stockHtml}</td>
+                    <td data-label="ID">#${book.book_id}</td>
+                    <td style="font-weight: 500;" data-label="Book Information">${book.title}<br><small style="color:var(--text-muted)">ISBN: ${book.isbn}</small></td>
+                    <td data-label="Author">${author}</td>
+                    <td data-label="Category">${category}</td>
+                    <td data-label="Stock">${stockHtml}</td>
             `;
 
             // Add Request/Reserve Button for students
@@ -355,11 +426,11 @@ async function loadMembers() {
         result.data.forEach(mem => {
             tbody.innerHTML += `
                 <tr>
-                    <td>#${mem.member_id}</td>
-                    <td>${mem.university_id}</td>
-                    <td style="font-weight: 500;">${mem.first_name} ${mem.last_name}</td>
-                    <td>${mem.email}</td>
-                    <td><span style="background:#e5e7eb; padding: 2px 8px; border-radius: 12px; font-size: 0.8rem; color:#111;">${mem.member_type}</span></td>
+                    <td data-label="ID">#${mem.member_id}</td>
+                    <td data-label="Univ ID">${mem.university_id}</td>
+                    <td style="font-weight: 500;" data-label="Name">${mem.first_name} ${mem.last_name}</td>
+                    <td data-label="Email">${mem.email}</td>
+                    <td data-label="Type"><span style="background:#e5e7eb; padding: 2px 8px; border-radius: 12px; font-size: 0.8rem; color:#111;">${mem.member_type}</span></td>
                 </tr>
             `;
         });
@@ -407,10 +478,10 @@ async function loadBorrowings() {
             }
 
             rowHtml += `
-                <td style="font-weight: 500;">${rec.book_title}</td>
-                <td>${new Date(rec.borrow_date).toLocaleDateString()}</td>
-                <td>${new Date(rec.due_date).toLocaleDateString()}</td>
-                <td style="color: ${dueColor}; font-weight: 600;">${rec.days_left < 0 ? Math.abs(rec.days_left) + ' days overdue' : rec.days_left + ' days left'}</td>
+                <td style="font-weight: 500;" data-label="Book Information">${rec.book_title}</td>
+                <td data-label="Issue Date">${new Date(rec.borrow_date).toLocaleDateString()}</td>
+                <td data-label="Due Date">${new Date(rec.due_date).toLocaleDateString()}</td>
+                <td style="color: ${dueColor}; font-weight: 600;" data-label="Status">${rec.days_left < 0 ? Math.abs(rec.days_left) + ' days overdue' : rec.days_left + ' days left'}</td>
             `;
 
             if (currentUser.role === 'student') {
@@ -450,11 +521,11 @@ async function loadRequests() {
         result.data.forEach(req => {
             tbody.innerHTML += `
                 <tr>
-                    <td><b>#${req.record_id}</b></td>
-                    <td>${req.member_first_name} ${req.member_last_name} <small>(${req.university_id})</small></td>
-                    <td style="font-weight: 500;">${req.book_title}</td>
-                    <td>${new Date(req.borrow_date).toLocaleDateString()}</td>
-                    <td>
+                    <td data-label="ID"><b>#${req.record_id}</b></td>
+                    <td data-label="Member">${req.member_first_name} ${req.member_last_name} <small>(${req.university_id})</small></td>
+                    <td style="font-weight: 500;" data-label="Book">${req.book_title}</td>
+                    <td data-label="Requested On">${new Date(req.borrow_date).toLocaleDateString()}</td>
+                    <td data-label="Actions">
                         <button class="btn btn-primary" style="padding: 0.3rem 0.6rem; font-size:0.8rem; margin-right:5px;" onclick="approveRequest(${req.record_id})">Approve</button>
                         <button class="btn btn-secondary" style="padding: 0.3rem 0.6rem; font-size:0.8rem; border-color:var(--danger); color:var(--danger)" onclick="rejectRequest(${req.record_id})">Reject</button>
                     </td>
