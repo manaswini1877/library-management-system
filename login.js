@@ -14,7 +14,7 @@ if ('serviceWorker' in navigator) {
 const APP_VERSION = '1.0.4';
 const API_URL = (window.location.hostname === 'localhost' || window.location.hostname.includes('10.242.'))
     ? `http://${window.location.hostname}:3000/api`
-    : 'https://l-b-s.onrender.com/api'; // Use relative path for production (Render)
+    : '/api'; // Relative path is safest for same-domain hosting
 let currentRole = 'student'; // default
 
 document.addEventListener('DOMContentLoaded', () => {
