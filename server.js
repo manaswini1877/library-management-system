@@ -16,7 +16,8 @@ const dbConfig = {
     password: process.env.DB_PASSWORD || '', 
     database: process.env.DB_NAME || 'University_ERP_DB',
     port: process.env.DB_PORT || 3306,
-    multipleStatements: true
+    multipleStatements: true,
+    ssl: process.env.DB_HOST ? { rejectUnauthorized: false } : false // Enable SSL for cloud DB
 };
 
 // Create a connection pool

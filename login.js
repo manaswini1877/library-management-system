@@ -121,13 +121,17 @@ async function handleLogin(e) {
             body: JSON.stringify({ username, password, role: currentRole })
         });
 
-        const result = await res.json();
+        if (!res.ok) {
+            const errorText = await res.text();
+            console.error(`Login Error (${res.status}):`, errorText);
+            throw new Error(`Server Error (${res.status}). Please check database connectivity.`);
+        }
 
+        const result = await res.json();
         if (!result.success) throw new Error(result.message);
 
         // Save session data to localStorage
         localStorage.setItem('lms_user', JSON.stringify(result.user));
-
         showToast('Login Successful!', true);
 
         // Redirect to main App
@@ -136,6 +140,7 @@ async function handleLogin(e) {
         }, 500);
 
     } catch (error) {
+        console.error('Login Process Error:', error);
         showToast(error.message, false);
         btn.textContent = 'Sign In';
         btn.disabled = false;
