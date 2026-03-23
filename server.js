@@ -31,12 +31,27 @@ const dbConfig = {
     password: process.env.DB_PASSWORD || '', 
     database: process.env.DB_NAME || 'University_ERP_DB',
     port: process.env.DB_PORT || 3306,
-    multipleStatements: true,
-    ssl: process.env.DB_HOST ? { rejectUnauthorized: false } : false // Enable SSL for cloud DB
+    socketPath: null,
+    ssl: process.env.DB_HOST ? { rejectUnauthorized: false } : false,
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0
 };
+
+console.log(`[Startup] Connecting to database at ${dbConfig.host}:${dbConfig.port}...`);
 
 // Create a connection pool
 const pool = mysql.createPool(dbConfig);
+
+// Test database connection immediately
+pool.getConnection()
+    .then(conn => {
+        console.log('[Startup] ✅ Database connection successful!');
+        conn.release();
+    })
+    .catch(err => {
+        console.error('[Startup] ❌ Database connection failed:', err.message);
+    });
 
 // Test the database connection on startup
 pool.getConnection()
@@ -486,6 +501,9 @@ app.post('/api/return', async (req, res) => {
 });
 
 // Start the server
-app.listen(port, () => {
-    console.log(`Backend Server is running elegantly at http://localhost:${port}`);
+app.listen(port, '0.0.0.0', () => {
+    console.log('==============================================');
+    console.log(`🚀 LMS SERVER LIVE AT PORT ${port}`);
+    console.log(`🔗 Health Check: http://localhost:${port}/api/health`);
+    console.log('==============================================');
 });
