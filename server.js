@@ -16,6 +16,10 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(__dirname)); // Serve frontend files (HTML/CSS/JS) automatically 
 
+// Health check to verify the server is actually responding at all
+app.get('/api/health', (req, res) => {
+    res.json({ status: 'OK', version: '1.0.4', database: !!pool });
+});
 // Database configuration
 const dbConfig = {
     host: process.env.DB_HOST || 'localhost',

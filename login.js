@@ -11,12 +11,19 @@ if ('serviceWorker' in navigator) {
     });
 }
 
+const APP_VERSION = '1.0.4';
 const API_URL = (window.location.hostname === 'localhost' || window.location.hostname.includes('10.242.'))
     ? `http://${window.location.hostname}:3000/api`
     : 'https://l-b-s.onrender.com/api'; // Use relative path for production (Render)
 let currentRole = 'student'; // default
 
 document.addEventListener('DOMContentLoaded', () => {
+    // Add version tag for debugging
+    const verTag = document.createElement('div');
+    verTag.style.cssText = 'position:fixed; bottom:10px; right:10px; font-size:10px; color:gray;';
+    verTag.textContent = 'v' + APP_VERSION;
+    document.body.appendChild(verTag);
+
     // If already logged in, redirect to LMS
     if (localStorage.getItem('lms_user')) {
         window.location.href = 'lms.html';
